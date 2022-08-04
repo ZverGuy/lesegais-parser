@@ -1,5 +1,5 @@
 ﻿{
-  "ConnectionString" : "",
-  "RequestDelay": 5,
+  "ConnectionString" : "Server=localhost;Database=database;Uid=root;Pwd=lmao;",
+  "RequestDelay": 3,
   "RecordCountPerRequest": 20
 }

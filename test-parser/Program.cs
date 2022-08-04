@@ -33,13 +33,7 @@ namespace test_parser
                     try
                     {
                         var responce = await requester.ParseSearchWoodDealAsync(page);
-                        foreach (var searchWoodDealJson in responce)
-                        {
-                            if(!repository.TryGetDeal(searchWoodDealJson.dealNumber, out var model))
-                            {
-                                
-                            }
-                        }
+                        await repository.InsertOrUpdateManyAsync(responce);
                         Console.WriteLine(responce);
                         await Task.Delay(TimeSpan.FromSeconds(config.RequestDelay));
                     }
@@ -48,8 +42,6 @@ namespace test_parser
                         Console.WriteLine(e);
                         continue;
                     }
-
-                    
                 }
                 await Task.Delay(TimeSpan.FromMinutes(10));
             }

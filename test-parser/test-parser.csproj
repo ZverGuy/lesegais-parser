@@ -97,6 +97,7 @@
         <Compile Include="SearchDealWoodRequester.cs" />
         <Compile Include="SearchWoodDealJson.cs" />
         <Compile Include="SearchWoodDealModel.cs" />
+        <Compile Include="SearchWoodModelValidaror.cs" />
     </ItemGroup>
     <ItemGroup>
       <None Include="App.config" />
