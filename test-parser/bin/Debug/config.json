@@ -1,0 +1,5 @@
+﻿{
+  "ConnectionString" : "",
+  "RequestDelay": 5,
+  "RecordCountPerRequest": 20
+}
