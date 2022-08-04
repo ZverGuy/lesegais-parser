@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -34,7 +35,6 @@ namespace test_parser
                     {
                         var responce = await requester.ParseSearchWoodDealAsync(page);
                         await repository.InsertOrUpdateManyAsync(responce);
-                        Console.WriteLine(responce);
                         await Task.Delay(TimeSpan.FromSeconds(config.RequestDelay));
                     }
                     catch (Exception e)

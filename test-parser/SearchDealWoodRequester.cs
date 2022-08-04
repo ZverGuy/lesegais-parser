@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -14,6 +15,7 @@ namespace test_parser
         private readonly int _recordsPerPage;
         private readonly int _maxRetries;
         private readonly float _requestDelay;
+        private readonly int _dealCount;
 
         public SearchDealWoodRequester(Config config)
         {
@@ -22,6 +24,7 @@ namespace test_parser
             _recordsPerPage = config.RecordCountPerRequest;
             _maxRetries = config.MaxRetries;
             _requestDelay = config.RequestDelay;
+            _dealCount = config.DealCount;
         }
 
 
@@ -51,7 +54,8 @@ namespace test_parser
             var responce = await _httpClient.SendAsync(request);
             var datastring = await responce.Content.ReadAsStringAsync();
             JObject data = JObject.Parse(datastring);
-
+            if (data["data"]["searchReportWoodDeal"]["total"] == null)
+                return _dealCount;
             return data["data"]["searchReportWoodDeal"]["total"].Value<int>();
         }
 
@@ -87,6 +91,7 @@ namespace test_parser
                 JObject data = JObject.Parse(datastring);
                 var str = data["data"]["searchReportWoodDeal"]["content"].ToString();
                 result = JsonConvert.DeserializeObject<SearchWoodDealJson[]>(str);
+                Console.WriteLine($"[Parser][Task]Parsing Completed Successfully.");
                 return result;
             }
             catch (Exception e)
