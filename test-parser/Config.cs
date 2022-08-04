@@ -6,5 +6,7 @@
         public float RequestDelay { get; set; }
         public int RecordCountPerRequest { get; set; } = 20;
         public int MaxRetries { get; set; } = 3;
+
+        public int DealCount { get; set; } = 250000;
     }
 }
