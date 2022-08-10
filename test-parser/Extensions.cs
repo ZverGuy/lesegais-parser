@@ -15,7 +15,8 @@ namespace test_parser
                 DeclarationNumber = json.dealNumber,
                 WoodVolumeCustomer = Math.Abs(json.woodVolumeBuyer - default(double)) > 0.1 ? json.woodVolumeBuyer : default,
                 WoodVolumeTrader = Math.Abs(json.woodVolumeSeller - default(double)) > 0.1 ? json.woodVolumeSeller : default,
-                DealDate = DateTime.Parse(json.dealDate)
+                DealDate = DateTime.Parse(json.dealDate),
+                LastUpdated = DateTime.Now
             };
         }
     }

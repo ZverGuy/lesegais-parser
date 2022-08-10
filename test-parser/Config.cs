@@ -1,4 +1,6 @@
-﻿namespace test_parser
+﻿using System;
+
+namespace test_parser
 {
     public class Config
     {

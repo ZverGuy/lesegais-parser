@@ -13,16 +13,24 @@ namespace test_parser
         {
             _strictValidation = config.EnableStrictValidation;
         }
-        public bool IsValid(SearchWoodDealJson json)
+        public bool ValidateJson(SearchWoodDealJson json)
         {
             bool buyerNameValid = !string.IsNullOrWhiteSpace(json.buyerName);
-            bool buyerInnLengthValid = (json.buyerInn.Length > 5);
-            bool buyerInnIsNumber = IsNumber(json.buyerInn);
-            
             bool sellerNameValid = !string.IsNullOrWhiteSpace(json.sellerName);
-            bool sellerInnLengthValid = (json.sellerInn.Length > 5);
-            bool sellerInnIsNumber = IsNumber(json.sellerInn);
             
+            bool buyerInnLengthValid = true;
+            bool buyerInnIsNumber = true;
+            bool sellerInnLengthValid = true;
+            bool sellerInnIsNumber = true;
+            if (_strictValidation)
+            {
+                buyerInnLengthValid = (json.buyerInn.Length > 5);
+                buyerInnIsNumber = IsNumber(json.buyerInn);
+            
+           
+                sellerInnLengthValid = (json.sellerInn.Length > 5);
+                sellerInnIsNumber = IsNumber(json.sellerInn);
+            }
             bool dealDateValid = ValidateDate(json.dealDate);
 
             if (buyerNameValid &&

@@ -13,16 +13,16 @@ namespace test_parser
     {
         private readonly string _connectionString;
         private readonly SearchWoodModelValidaror _validator;
-        private bool _dataBaseIsEmpty;
+        public bool DataBaseIsEmpty;
 
         public SearchDealRepository(Config config)
         {
             _connectionString = config.ConnectionString;
             _validator = new SearchWoodModelValidaror(config);
-            _dataBaseIsEmpty = DataBaseIsEmpty();
+            DataBaseIsEmpty = DataBaseIsEmptyCheck();
         }
 
-        private bool DataBaseIsEmpty()
+        private bool DataBaseIsEmptyCheck()
         {
             bool hasRecords = false;
             using (MySqlConnection connection = new MySqlConnection(_connectionString))
@@ -65,24 +65,60 @@ namespace test_parser
             }
             
         }
-        
-        public async Task InsertOrUpdateManyAsync(IEnumerable<SearchWoodDealJson> jsons, bool ignoreDealIfExist = true)
+
+        public bool TryGetDeal(string decNumber, out SearchWoodDealModel model)
+        {
+            model = null;
+            using (MySqlConnection connection = new MySqlConnection(_connectionString))
+            {
+                using (MySqlCommand command = connection.CreateCommand())
+                {
+                    command.CommandText = "SELECT * FROM search_wood WHERE dec_number = @dec_number";
+                    command.Parameters.AddWithValue("@dec_number", decNumber);
+                    MySqlDataReader reader = command.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        reader.Read();
+                        model = new SearchWoodDealModel()
+                        {
+                            CustomerInn = reader.GetInt64("c_inn"),
+                            CustomerName = reader.GetString("c_name"),
+                            DealDate = reader.GetDateTime("d_date"),
+                            DeclarationNumber = decNumber,
+                            LastUpdated = reader.GetDateTime("last_update"),
+                            TraderInn = reader.GetInt64("t_inn"),
+                            TraderName = reader.GetString("t_name"),
+                            WoodVolumeCustomer = reader.GetDouble("w_volume_c"),
+                            WoodVolumeTrader = reader.GetDouble("w_volume_t")
+                        };
+                        return true;
+                    }
+
+                    return false;
+                }
+            }
+        }
+
+        public async Task InsertOrUpdateManyAsync(IEnumerable<SearchWoodDealJson> jsons)
         {
             foreach (var json in jsons)
             {
-                if (_validator.IsValid(json))
+                if (!_validator.ValidateJson(json)) continue;
+                if (!DataBaseIsEmpty)
                 {
-                    if (!_dataBaseIsEmpty)
+                    if (TryGetDeal(json.dealNumber, out var model))
                     {
-                        if (DealExistInDb(json.dealNumber) && ignoreDealIfExist)
+                        Console.WriteLine($"[Repository][Task-{Task.CurrentId}]Deal {json.dealNumber} exist in db. Equals Checking...");
+
+                        if (Equals(model, json.ToDataBaseModel()))
                         {
-                            Console.WriteLine($"[Repository][Task-{Task.CurrentId}]Deal {json.dealNumber} exist in db and ignoring enabled");
+                            Console.WriteLine($"[Repository][Task-{Task.CurrentId}]Deal {json.dealNumber} does not changed, skip.");
                             continue;
                         }
                     }
-                    Console.WriteLine($"[Repository][Task-{Task.CurrentId}]Adding new deal {json.dealNumber}");
-                    await InsertOrUpdatePrivateAsync(json.ToDataBaseModel());
                 }
+                Console.WriteLine($"[Repository][Task-{Task.CurrentId}]Adding or Updating deal {json.dealNumber}");
+                await InsertOrUpdatePrivateAsync(json.ToDataBaseModel());
             }
                 
         }
