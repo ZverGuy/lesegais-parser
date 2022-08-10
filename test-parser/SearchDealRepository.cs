@@ -71,6 +71,7 @@ namespace test_parser
             model = null;
             using (MySqlConnection connection = new MySqlConnection(_connectionString))
             {
+                connection.Open();
                 using (MySqlCommand command = connection.CreateCommand())
                 {
                     command.CommandText = "SELECT * FROM search_wood WHERE dec_number = @dec_number";
@@ -91,9 +92,10 @@ namespace test_parser
                             WoodVolumeCustomer = reader.GetDouble("w_volume_c"),
                             WoodVolumeTrader = reader.GetDouble("w_volume_t")
                         };
+                        connection.Close();
                         return true;
                     }
-
+                    connection.Close();
                     return false;
                 }
             }
@@ -132,8 +134,8 @@ namespace test_parser
                 {
                     command.CommandText =
                         "INSERT INTO search_wood " +
-                        "(dec_number, t_name, t_inn, c_name, c_inn, w_volume_t, w_volume_c, d_date) " +
-                        "VALUE (@dec_number, @t_name, @t_inn, @c_name, @c_inn, @wood_v_t,@wood_v_c, @deal_date)" +
+                        "(dec_number, t_name, t_inn, c_name, c_inn, w_volume_t, w_volume_c, d_date, last_update) " +
+                        "VALUE (@dec_number, @t_name, @t_inn, @c_name, @c_inn, @wood_v_t,@wood_v_c, @deal_date, @last_update)" +
                         "ON DUPLICATE KEY UPDATE " +
                         "dec_number = @dec_number," +
                         "t_name = @t_name," +
@@ -142,7 +144,8 @@ namespace test_parser
                         "c_inn = @c_inn," +
                         "w_volume_t = @wood_v_t," +
                         "w_volume_c = @wood_v_c," +
-                        "d_date=@deal_date";
+                        "d_date=@deal_date," +
+                        "last_update = @last_update";
                     command.Parameters.AddWithValue("@dec_number", model.DeclarationNumber);
                     command.Parameters.AddWithValue("@t_name", model.TraderName);
                     command.Parameters.AddWithValue("@t_inn", model.TraderInn);
@@ -151,6 +154,7 @@ namespace test_parser
                     command.Parameters.AddWithValue("@wood_v_t", model.WoodVolumeTrader);
                     command.Parameters.AddWithValue("@wood_v_c", model.WoodVolumeCustomer);
                     command.Parameters.AddWithValue("@deal_date", model.DealDate);
+                    command.Parameters.AddWithValue("@last_update", model.LastUpdated);
                     await command.ExecuteNonQueryAsync();
                 }
                 await connection.CloseAsync();

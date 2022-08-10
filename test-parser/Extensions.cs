@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.RegularExpressions;
 
 namespace test_parser
 {
@@ -8,9 +9,9 @@ namespace test_parser
         {
             return new SearchWoodDealModel()
             {
-                CustomerInn = Convert.ToInt64(string.IsNullOrEmpty(json.buyerInn) ? "0" : json.buyerInn),
+                CustomerInn = Convert.ToInt64(string.IsNullOrEmpty(json.buyerInn) ? "0" : json.buyerInn.RemoveNotNumbers()),
                 CustomerName = json.buyerName,
-                TraderInn = Convert.ToInt64(string.IsNullOrEmpty(json.sellerInn) ? "0" : json.sellerInn),
+                TraderInn = Convert.ToInt64(string.IsNullOrEmpty(json.sellerInn) ? "0" : json.sellerInn.RemoveNotNumbers()),
                 TraderName = json.sellerName,
                 DeclarationNumber = json.dealNumber,
                 WoodVolumeCustomer = Math.Abs(json.woodVolumeBuyer - default(double)) > 0.1 ? json.woodVolumeBuyer : default,
@@ -18,6 +19,11 @@ namespace test_parser
                 DealDate = DateTime.Parse(json.dealDate),
                 LastUpdated = DateTime.Now
             };
+        }
+
+        public static string RemoveNotNumbers(this string str)
+        {
+            return Regex.Replace(str, "[^A-Za-z0-9 -]", "");
         }
     }
 }
