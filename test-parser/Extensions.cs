@@ -8,13 +8,13 @@ namespace test_parser
         {
             return new SearchWoodDealModel()
             {
-                CustomerInn = json.buyerInn,
+                CustomerInn = Convert.ToInt64(string.IsNullOrEmpty(json.buyerInn) ? "0" : json.buyerInn),
                 CustomerName = json.buyerName,
-                TraderInn = json.sellerInn,
+                TraderInn = Convert.ToInt64(string.IsNullOrEmpty(json.sellerInn) ? "0" : json.sellerInn),
                 TraderName = json.sellerName,
                 DeclarationNumber = json.dealNumber,
-                WoodVolumeCustomer = json.woodVolumeBuyer != default ? json.woodVolumeBuyer : default,
-                WoodVolumeTrader = json.woodVolumeSeller != default ? json.woodVolumeSeller : default,
+                WoodVolumeCustomer = Math.Abs(json.woodVolumeBuyer - default(double)) > 0.1 ? json.woodVolumeBuyer : default,
+                WoodVolumeTrader = Math.Abs(json.woodVolumeSeller - default(double)) > 0.1 ? json.woodVolumeSeller : default,
                 DealDate = DateTime.Parse(json.dealDate)
             };
         }

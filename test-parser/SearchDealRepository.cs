@@ -13,11 +13,35 @@ namespace test_parser
     {
         private readonly string _connectionString;
         private readonly SearchWoodModelValidaror _validator;
+        private bool _dataBaseIsEmpty;
 
-        public SearchDealRepository(string connectionString)
+        public SearchDealRepository(Config config)
         {
-            _connectionString = connectionString;
-            _validator = new SearchWoodModelValidaror();
+            _connectionString = config.ConnectionString;
+            _validator = new SearchWoodModelValidaror(config);
+            _dataBaseIsEmpty = DataBaseIsEmpty();
+        }
+
+        private bool DataBaseIsEmpty()
+        {
+            bool hasRecords = false;
+            using (MySqlConnection connection = new MySqlConnection(_connectionString))
+            {
+                connection.Open();
+                using (MySqlCommand command = connection.CreateCommand())
+                {
+                    command.CommandText = "SELECT COUNT(dec_number) FROM search_wood";
+                    MySqlDataReader reader = command.ExecuteReader();
+                    if (reader.HasRows)
+                    {
+                        reader.Read();
+                        hasRecords = reader.GetInt64("COUNT(dec_number)") == 0;
+                    }
+                }
+                connection.Close();
+                
+            }
+            return hasRecords;
         }
 
         public bool DealExistInDb(string declarationNumber)
@@ -27,7 +51,7 @@ namespace test_parser
                 connection.Open();
                 using (MySqlCommand command = connection.CreateCommand())
                 {
-                    command.CommandText = "SELECT * FROM searchreportwooddeal WHERE declaration_number = @id";
+                    command.CommandText = "SELECT * FROM search_wood WHERE dec_number = @id";
                     command.Parameters.AddWithValue("@id", declarationNumber);
                     MySqlDataReader dataReader = command.ExecuteReader();
                     if (dataReader.HasRows)
@@ -42,14 +66,25 @@ namespace test_parser
             
         }
         
-        public async Task InsertOrUpdateManyAsync(IEnumerable<SearchWoodDealJson> jsons)
+        public async Task InsertOrUpdateManyAsync(IEnumerable<SearchWoodDealJson> jsons, bool ignoreDealIfExist = true)
         {
             foreach (var json in jsons)
+            {
                 if (_validator.IsValid(json))
                 {
+                    if (!_dataBaseIsEmpty)
+                    {
+                        if (DealExistInDb(json.dealNumber) && ignoreDealIfExist)
+                        {
+                            Console.WriteLine($"[Repository][Task-{Task.CurrentId}]Deal {json.dealNumber} exist in db and ignoring enabled");
+                            continue;
+                        }
+                    }
                     Console.WriteLine($"[Repository][Task-{Task.CurrentId}]Adding new deal {json.dealNumber}");
-                        await InsertOrUpdatePrivateAsync(json.ToDataBaseModel());
+                    await InsertOrUpdatePrivateAsync(json.ToDataBaseModel());
                 }
+            }
+                
         }
         
          private async Task InsertOrUpdatePrivateAsync(SearchWoodDealModel model)
@@ -60,18 +95,18 @@ namespace test_parser
                 using (MySqlCommand command = connection.CreateCommand())
                 {
                     command.CommandText =
-                        "INSERT INTO searchreportwooddeal " +
-                        "(declaration_number, trader_name, trader_inn, customer_name, customer_inn, wood_volume_trader, wood_volume_customer, deal_date) " +
+                        "INSERT INTO search_wood " +
+                        "(dec_number, t_name, t_inn, c_name, c_inn, w_volume_t, w_volume_c, d_date) " +
                         "VALUE (@dec_number, @t_name, @t_inn, @c_name, @c_inn, @wood_v_t,@wood_v_c, @deal_date)" +
                         "ON DUPLICATE KEY UPDATE " +
-                        "declaration_number = @dec_number," +
-                        "trader_name = @t_name," +
-                        "trader_inn = @t_inn," +
-                        "customer_name = @c_name," +
-                        "customer_inn = @c_inn," +
-                        "wood_volume_trader = @wood_v_t," +
-                        "wood_volume_customer = @wood_v_c," +
-                        "deal_date=@deal_date";
+                        "dec_number = @dec_number," +
+                        "t_name = @t_name," +
+                        "t_inn = @t_inn," +
+                        "c_name = @c_name," +
+                        "c_inn = @c_inn," +
+                        "w_volume_t = @wood_v_t," +
+                        "w_volume_c = @wood_v_c," +
+                        "d_date=@deal_date";
                     command.Parameters.AddWithValue("@dec_number", model.DeclarationNumber);
                     command.Parameters.AddWithValue("@t_name", model.TraderName);
                     command.Parameters.AddWithValue("@t_inn", model.TraderInn);

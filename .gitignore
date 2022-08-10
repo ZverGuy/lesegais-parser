@@ -1,4 +1,4 @@
 ﻿packages
 .idea
-./test-parser/bin/
-./test-parser/obj/
+./test-parser/bin
+./test-parser/obj

@@ -23,7 +23,7 @@ namespace test_parser
                 throw new ArgumentNullException("config.json is empty");
             
             SearchDealWoodRequester requester = new SearchDealWoodRequester(config);
-            SearchDealRepository repository = new SearchDealRepository(config.ConnectionString);
+            SearchDealRepository repository = new SearchDealRepository(config);
             int dealCount = await requester.GetDealCountsAsync();
             int pagesCount = dealCount / config.RecordCountPerRequest;
             

@@ -1,5 +1,7 @@
 ﻿{
-  "ConnectionString" : "Server=localhost;Database=database;Uid=root;Pwd=lmao;",
+  "ConnectionString" : "Server=localhost;Database=db_schema;Uid=root;Pwd=lmao;SSL Mode=None",
   "RequestDelay": 3,
-  "RecordCountPerRequest": 999
+  "MaxRetries": 3,
+  "RecordCountPerRequest": 999,
+  "EnableStrictValidation": false
 }
