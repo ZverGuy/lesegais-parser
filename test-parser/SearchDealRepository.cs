@@ -10,10 +10,12 @@ namespace test_parser
         private readonly string _connectionString;
         private readonly SearchWoodModelValidaror _validator;
         public bool DataBaseIsEmpty;
+        private readonly bool _enableUpdate;
 
         public SearchDealRepository(Config config)
         {
             _connectionString = config.ConnectionString;
+            _enableUpdate = config.UpdateRecords;
             _validator = new SearchWoodModelValidaror(config);
             DataBaseIsEmpty = DataBaseIsEmptyCheck();
         }
@@ -82,6 +84,8 @@ namespace test_parser
                 if (!_validator.ValidateJson(json)) continue;
                 if (TryGetDeal(json.dealNumber, out var model))
                 {
+                    if(!_enableUpdate) continue;
+                    
                     Console.WriteLine(
                         $"[Repository][Task-{Task.CurrentId}]Deal {json.dealNumber} exist in db. Equals Checking...");
                     if (Equals(model, json.ToDataBaseModel()))

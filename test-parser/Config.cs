@@ -11,5 +11,7 @@ namespace test_parser
         public int DealCount { get; set; } = 250000;
 
         public bool EnableStrictValidation { get; set; } = false;
+
+        public bool UpdateRecords { get; set; } = true;
     }
 }

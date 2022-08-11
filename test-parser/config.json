@@ -3,5 +3,7 @@
   "RequestDelay": 3,
   "MaxRetries": 3,
   "RecordCountPerRequest": 999,
-  "EnableStrictValidation": false
+  "DealCount" : 300000,
+  "EnableStrictValidation": false,
+  "UpdateRecords": true
 }
