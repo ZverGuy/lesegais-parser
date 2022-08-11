@@ -43,6 +43,7 @@ namespace test_parser
                         continue;
                     }
                 }
+                Console.WriteLine("Parsing ended. Waiting 10 minutes");
                 await Task.Delay(TimeSpan.FromMinutes(10));
             }
         }

@@ -24,12 +24,17 @@ namespace test_parser
             bool sellerInnIsNumber = true;
             if (_strictValidation)
             {
-                buyerInnLengthValid = (json.buyerInn.Length > 5);
-                buyerInnIsNumber = IsNumber(json.buyerInn);
-            
-           
-                sellerInnLengthValid = (json.sellerInn.Length > 5);
-                sellerInnIsNumber = IsNumber(json.sellerInn);
+                if (!(json.sellerName.Contains("Физическое лицо") && string.IsNullOrWhiteSpace(json.sellerInn)))
+                {
+                    sellerInnIsNumber = IsNumber(json.buyerInn);
+                    sellerInnLengthValid = (json.buyerInn.Length > 5);
+                }
+                
+                if (!(json.buyerName.Contains("Физическое лицо") && string.IsNullOrWhiteSpace(json.buyerInn)))
+                {
+                    buyerInnIsNumber = IsNumber(json.buyerInn);
+                    buyerInnLengthValid = (json.buyerInn.Length > 5);
+                }
             }
             bool dealDateValid = ValidateDate(json.dealDate);
 
@@ -51,7 +56,7 @@ namespace test_parser
         private bool ValidateDate(string jsonDealDate)
         {
             DateTime Temp;
-            if (DateTime.TryParse(jsonDealDate, out Temp) == true &&
+            if (DateTime.TryParse(jsonDealDate, out Temp) &&
                 Temp.Year > 1900 &&
                 Temp > DateTime.MinValue &&
                 Temp < DateTime.Now)

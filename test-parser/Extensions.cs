@@ -7,11 +7,13 @@ namespace test_parser
     {
         public static SearchWoodDealModel ToDataBaseModel(this SearchWoodDealJson json)
         {
+            var normalizedCustomerInn = string.IsNullOrEmpty(json.buyerInn) ? "0" : json.buyerInn.RemoveNotNumbers();
+            var normalizedTraderInn = string.IsNullOrEmpty(json.sellerInn) ? "0" : json.sellerInn.RemoveNotNumbers();
             return new SearchWoodDealModel()
             {
-                CustomerInn = Convert.ToInt64(string.IsNullOrEmpty(json.buyerInn) ? "0" : json.buyerInn.RemoveNotNumbers()),
+                CustomerInn = Convert.ToInt64(normalizedCustomerInn),
                 CustomerName = json.buyerName,
-                TraderInn = Convert.ToInt64(string.IsNullOrEmpty(json.sellerInn) ? "0" : json.sellerInn.RemoveNotNumbers()),
+                TraderInn = Convert.ToInt64(normalizedTraderInn),
                 TraderName = json.sellerName,
                 DeclarationNumber = json.dealNumber,
                 WoodVolumeCustomer = Math.Abs(json.woodVolumeBuyer - default(double)) > 0.1 ? json.woodVolumeBuyer : default,
@@ -23,7 +25,7 @@ namespace test_parser
 
         public static string RemoveNotNumbers(this string str)
         {
-            return Regex.Replace(str, "[^A-Za-z0-9 -]", "");
+            return  Regex.Replace(str, "[^0-9]", "");
         }
     }
 }
